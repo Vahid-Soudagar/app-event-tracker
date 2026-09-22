@@ -8,7 +8,7 @@ import kotlinx.coroutines.delay
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
-object EventProcessor {
+internal object EventProcessor {
 
     suspend fun processPending(context: Context) {
 
