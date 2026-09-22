@@ -44,7 +44,7 @@ internal object EventProcessor {
                     "Ingestion attempt: $event"
                 )
 
-                val isSuccess = Random.nextInt(100) < 20
+                val isSuccess = Random.nextInt(100) < 80
                 if (isSuccess) {
 
                     currentEvent = currentEvent.copy(
