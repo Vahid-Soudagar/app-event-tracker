@@ -22,10 +22,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.appeventtracker.sdk.Analytics
 import com.example.appeventtracker.ui.components.EventItem
 import com.example.appeventtracker.util.MockDataGenerator
 
@@ -35,7 +37,7 @@ fun EventQueueScreen(
 ) {
 
     val selectedTab = remember { mutableIntStateOf(0) }
-
+    val context = LocalContext.current
 
     Column(
         modifier = modifier.fillMaxSize()
@@ -57,6 +59,17 @@ fun EventQueueScreen(
             IconButton(
                 onClick = {
                     // Refresh later
+                    val json = """
+                        {
+                            "events": [
+                                "INSTALL",
+                                "VISIT",
+                                "ADD_TO_CART",
+                                "PURCHASE"
+                            ]
+                        }
+                    """.trimIndent()
+                    Analytics.reportEvents(json = json, context = context)
                 }
             ) {
                 Icon(
