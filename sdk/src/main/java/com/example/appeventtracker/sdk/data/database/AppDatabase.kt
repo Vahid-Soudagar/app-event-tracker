@@ -1,0 +1,15 @@
+package com.example.appeventtracker.sdk.data.database
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import com.example.appeventtracker.sdk.data.dao.EventDao
+import com.example.appeventtracker.sdk.data.model.EventEntity
+
+@Database(
+    entities = [EventEntity::class],
+    version = 1,
+    exportSchema = true
+)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun eventDao() : EventDao
+}

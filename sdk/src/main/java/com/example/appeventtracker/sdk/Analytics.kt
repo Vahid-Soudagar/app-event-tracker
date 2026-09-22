@@ -2,24 +2,30 @@ package com.example.appeventtracker.sdk
 
 import android.content.Context
 import android.util.Log
+import com.example.appeventtracker.sdk.data.database.DatabaseProvider
+import com.example.appeventtracker.sdk.data.model.EventEntity
 import com.example.appeventtracker.sdk.model.Event
 import com.example.appeventtracker.sdk.model.EventRequest
+import com.example.appeventtracker.sdk.model.EventStatus
+import com.example.appeventtracker.sdk.model.EventType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 object Analytics {
-
-    private val processedInstallations = mutableSetOf<String>()
-    private val processedVisitSessions = mutableSetOf<String>()
 
     fun reportEvents(json: String, context: Context) {
         Log.d("DebugTag", "Json is $json")
         val request = Json.decodeFromString<EventRequest>(json)
         Log.d("DebugTag", "Request $request")
+
         val sessionId = SessionManager.getSessionId()
         val installationId = InstallationManager.getInstallationId(context = context)
+
         val enrichedEvents = request.events.map { eventType ->
             Event(
-                eventType = eventType,
+                eventType = EventType.valueOf(eventType),
                 timeStamp = System.currentTimeMillis(),
                 sessionId = sessionId,
                 installationId = installationId
@@ -27,32 +33,58 @@ object Analytics {
         }
         Log.d("DebugTag", "Events $enrichedEvents")
 
-        val validEvents = enrichedEvents.filter { event ->
-            when (event.eventType) {
-                "INSTALL" -> {
-                    if (processedInstallations.contains(event.installationId)) {
-                        false
-                    } else {
-                        processedInstallations.add(event.installationId)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val database = DatabaseProvider.getDatabase(context)
+            val dao = database.eventDao()
+
+            enrichedEvents.forEach { event ->
+                val shouldProcess = when (event.eventType) {
+                    EventType.INSTALL -> {
+                        !dao.isInstalledProcessed(
+                            eventType = EventType.INSTALL,
+                            installationId = event.installationId
+                        )
+                    }
+
+                    EventType.VISIT -> {
+                        !dao.isVisitProcessed(
+                            eventType = EventType.VISIT,
+                            sessionId = event.sessionId
+                        )
+                    }
+
+                    EventType.ADD_TO_CART -> {
+                        true
+                    }
+
+                    EventType.PURCHASE -> {
                         true
                     }
                 }
 
-                "VISIT" -> {
-                    if (processedVisitSessions.contains(event.sessionId)) {
-                        false
-                    } else {
-                        processedVisitSessions.add(event.sessionId)
-                        true
-                    }
-                }
+                if (shouldProcess) {
+                    val eventEntity = EventEntity(
+                        eventType = event.eventType,
+                        timeStamp = event.timeStamp,
+                        sessionId = event.sessionId,
+                        installationId = event.installationId,
+                        status = EventStatus.PENDING
+                    )
 
-                else -> {
-                    true
+                    dao.insert(event = eventEntity)
+                    Log.d(
+                        "DebugTag",
+                        "Inserted: $eventEntity"
+                    )
+                } else {
+                    Log.d(
+                        "DebugTag",
+                        "Duplicate skipped: $event"
+                    )
                 }
             }
-        }
 
-        Log.d("DebugTag", "Valid Events $validEvents")
+        }
     }
 }
