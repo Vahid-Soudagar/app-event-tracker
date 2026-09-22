@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import com.example.appeventtracker.ui.components.AppBottomNavigation
 import com.example.appeventtracker.ui.components.AppTopBar
 import com.example.appeventtracker.ui.screens.EventQueueScreen
+import com.example.appeventtracker.ui.screens.MockDataScreen
 import com.example.appeventtracker.ui.screens.StatisticsScreen
 
 @Composable
@@ -37,6 +38,9 @@ fun App(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(innerPadding)
             )
             1 -> StatisticsScreen(
+                modifier = Modifier.padding(innerPadding)
+            )
+            2 -> MockDataScreen(
                 modifier = Modifier.padding(innerPadding)
             )
         }

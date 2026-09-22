@@ -51,6 +51,15 @@ fun AppBottomNavigation(
                 },
                 modifier = Modifier.weight(1f)
             )
+
+            BottomNavItem(
+                text = "Mock Data",
+                selected = selectedScreen == 2,
+                onClick = {
+                    onScreenSelected(2)
+                },
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

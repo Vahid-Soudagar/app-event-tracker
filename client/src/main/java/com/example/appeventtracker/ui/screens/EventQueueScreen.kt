@@ -12,28 +12,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.appeventtracker.sdk.Analytics
 import com.example.appeventtracker.ui.components.EventItem
 import com.example.appeventtracker.util.MockDataGenerator
 
@@ -43,24 +35,6 @@ fun EventQueueScreen(
 ) {
 
     val selectedTab = remember { mutableIntStateOf(0) }
-    val context = LocalContext.current
-
-    var showDialog by remember { mutableStateOf(false) }
-
-    var jsonInput by remember {
-        mutableStateOf(
-            """
-        {
-            "events": [
-                "INSTALL",
-                "VISIT",
-                "ADD_TO_CART",
-                "PURCHASE"
-            ]
-        }
-        """.trimIndent()
-        )
-    }
 
     Column(
         modifier = modifier.fillMaxSize()
@@ -83,18 +57,6 @@ fun EventQueueScreen(
             IconButton(
                 onClick = {
                     // Refresh later
-//                    val json = """
-//                        {
-//                            "events": [
-//                                "INSTALL",
-//                                "VISIT",
-//                                "ADD_TO_CART",
-//                                "PURCHASE"
-//                            ]
-//                        }
-//                    """.trimIndent()
-//                    Analytics.reportEvents(json = json, context = context)
-                    showDialog = true
                 }
             ) {
                 Icon(
@@ -158,55 +120,6 @@ fun EventQueueScreen(
                 EventItem(event)
             }
         }
-    }
-
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showDialog = false
-            },
-            title = {
-                Text("Report Events")
-            },
-            text = {
-                OutlinedTextField(
-                    value = jsonInput,
-                    onValueChange = {
-                        jsonInput = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    label = {
-                        Text("Event JSON")
-                    }
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        Analytics.reportEvents(
-                            json = jsonInput,
-                            context = context
-                        )
-
-                        showDialog = false
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showDialog = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }
 
