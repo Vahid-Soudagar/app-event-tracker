@@ -38,4 +38,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+
+    // Startup
+    implementation("androidx.startup:startup-runtime:1.2.0")
 }
