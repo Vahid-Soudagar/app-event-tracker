@@ -84,7 +84,7 @@ object Analytics {
                     )
                 }
             }
-
+            EventProcessor.processPending(context = context)
         }
     }
 }
