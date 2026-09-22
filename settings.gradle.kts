@@ -23,5 +23,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AppEventTracker"
-include(":client")
+include(":app")
 include(":sdk")
