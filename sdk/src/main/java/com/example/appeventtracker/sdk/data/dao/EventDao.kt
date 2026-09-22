@@ -43,16 +43,17 @@ interface EventDao {
         sessionId: String
     ): Boolean
 
-//    @Query("""
-//        SELECT * FROM events
-//        WHERE status IN ('PENDING', 'FAILED')
-//    """)
-//    suspend fun getPendingEvents(): List<EventEntity>
-
     @Query("""
-    SELECT * FROM events
-    WHERE status = 'PENDING'
-    ORDER BY id ASC
-""")
+        SELECT * FROM events
+        WHERE status IN ('PENDING', 'FAILED')
+        ORDER BY id ASC
+    """)
     suspend fun getPendingEvents(): List<EventEntity>
+
+//    @Query("""
+//    SELECT * FROM events
+//    WHERE status = 'PENDING'
+//    ORDER BY id ASC
+//""")
+//    suspend fun getPendingEvents(): List<EventEntity>
 }

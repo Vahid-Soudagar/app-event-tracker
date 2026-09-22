@@ -24,40 +24,48 @@ object EventProcessor {
 
         pendingEvents.forEach { event ->
 
-            val randomDelay = Random.nextLong(
-                1_000L,
-                5_001L
-            )
+            var currentEvent = event
 
-            Log.d(
-                "EventProcessor",
-                "Waiting ${randomDelay}ms before processing $event"
-            )
+            while (currentEvent.status != EventStatus.PROCESSED) {
+                val randomDelay = Random.nextLong(
+                    1_000L,
+                    5_001L
+                )
 
-            delay(randomDelay.milliseconds)
-
-            Log.d(
-                "EventProcessor",
-                "Ingestion attempt: $event"
-            )
-
-            val isSuccess = Random.nextInt(100) < 80
-            if (isSuccess) {
-                val processedEvent = event.copy(status = EventStatus.PROCESSED)
-                dao.update(processedEvent)
                 Log.d(
                     "EventProcessor",
-                    "Ingestion SUCCESS: $processedEvent"
+                    "Waiting ${randomDelay}ms before processing $event"
                 )
-            } else {
-                val failedEvent = event.copy(
-                    status = EventStatus.FAILED
-                )
-                dao.update(failedEvent)
+
+                delay(randomDelay.milliseconds)
+
                 Log.d(
                     "EventProcessor",
-                    "Ingestion FAILED: $failedEvent"
+                    "Ingestion attempt: $event"
                 )
+
+                val isSuccess = Random.nextInt(100) < 80
+                if (isSuccess) {
+
+                    currentEvent = currentEvent.copy(
+                        status = EventStatus.PROCESSED
+                    )
+                    dao.update(currentEvent)
+                    Log.d(
+                        "EventProcessor",
+                        "Ingestion SUCCESS: $currentEvent"
+                    )
+                } else {
+                    currentEvent = currentEvent.copy(
+                        status = EventStatus.FAILED,
+                        retryCount = currentEvent.retryCount + 1
+                    )
+                    dao.update(currentEvent)
+                    Log.d(
+                        "EventProcessor",
+                        "Ingestion FAILED: $currentEvent"
+                    )
+                }
             }
         }
     }
