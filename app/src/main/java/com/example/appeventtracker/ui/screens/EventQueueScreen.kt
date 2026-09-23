@@ -65,7 +65,7 @@ fun EventQueueScreen(
             )
             IconButton(
                 onClick = {
-                    // Refresh later
+                    Analytics.retryPending(context = context)
                 }
             ) {
                 Icon(

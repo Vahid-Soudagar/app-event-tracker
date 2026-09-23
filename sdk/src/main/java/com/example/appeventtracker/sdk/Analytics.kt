@@ -92,6 +92,12 @@ object Analytics {
         }
     }
 
+    fun retryPending(context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            EventProcessor.processPending(context = context.applicationContext)
+        }
+    }
+
     fun observeQueueEvents(context: Context): Flow<List<QueueEvent>> {
         return DatabaseProvider
             .getDatabase(context)
