@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.appeventtracker.sdk.model.EventStatus
 import com.example.appeventtracker.sdk.model.EventType
+import com.example.appeventtracker.sdk.model.QueueEvent
 
 @Entity(tableName = "events")
 data class EventEntity(
@@ -28,5 +29,8 @@ data class EventEntity(
     val status: EventStatus,
 
     @ColumnInfo(name = "retry_count")
-    val retryCount: Int = 0
+    val retryCount: Int = 0,
+
+    @ColumnInfo(name = "next_retry_at")
+    val nextRetryAt: Long? = null
 )

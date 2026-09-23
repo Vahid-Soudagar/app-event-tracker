@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.example.appeventtracker.sdk.data.model.EventEntity
 import com.example.appeventtracker.sdk.model.EventType
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventDao {
@@ -45,15 +46,14 @@ interface EventDao {
 
     @Query("""
         SELECT * FROM events
-        WHERE status IN ('PENDING', 'FAILED')
+        WHERE status IN ('PENDING', 'PROCESSING', 'FAILED')
         ORDER BY id ASC
     """)
     suspend fun getPendingEvents(): List<EventEntity>
 
-//    @Query("""
-//    SELECT * FROM events
-//    WHERE status = 'PENDING'
-//    ORDER BY id ASC
-//""")
-//    suspend fun getPendingEvents(): List<EventEntity>
+    @Query("""
+        SELECT * FROM events
+        ORDER BY id ASC
+    """)
+    fun observeAllEvents(): Flow<List<EventEntity>>
 }

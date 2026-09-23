@@ -13,12 +13,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.appeventtracker.model.QueueEvent
+import com.example.appeventtracker.sdk.model.QueueEvent
 import com.example.appeventtracker.ui.theme.BorderColor
 import com.example.appeventtracker.ui.theme.CartLight
 import com.example.appeventtracker.ui.theme.InstallLight
@@ -28,6 +33,12 @@ import com.example.appeventtracker.ui.theme.RetryOrange
 import com.example.appeventtracker.ui.theme.SuccessGreen
 import com.example.appeventtracker.ui.theme.TextSecondary
 import com.example.appeventtracker.ui.theme.VisitLight
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+private val timeFormatter = SimpleDateFormat("hh:mm:ss a", Locale.getDefault())
 
 @Composable
 fun EventItem(
@@ -44,10 +55,25 @@ fun EventItem(
         else -> BorderColor
     }
 
-    val statusColor = when {
-        event.status.startsWith("Processed") -> SuccessGreen
-        event.status == "Processing" -> ProcessingBlue
-        else -> RetryOrange
+    // Tick every second while a retry is scheduled so the countdown stays live
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(event.nextRetryAt) {
+        val retryAt = event.nextRetryAt ?: return@LaunchedEffect
+        now = System.currentTimeMillis()
+        while (now < retryAt) {
+            delay(1_000L)
+            now = System.currentTimeMillis()
+        }
+    }
+
+    val (statusText, statusColor) = when (event.status) {
+        "PROCESSED" -> "Processed ✓" to SuccessGreen
+        "PROCESSING" -> "Processing" to ProcessingBlue
+        "FAILED" -> {
+            val seconds = ((event.nextRetryAt ?: now) - now + 999) / 1_000
+            (if (seconds > 0) "Retrying in ${seconds}s" else "Retrying") to RetryOrange
+        }
+        else -> "Queued" to TextSecondary
     }
 
     Row(
@@ -90,7 +116,7 @@ fun EventItem(
             )
 
             Text(
-                text = event.time,
+                text = timeFormatter.format(Date(event.timestamp)),
                 modifier = Modifier.padding(top = 4.dp),
                 fontSize = 9.sp,
                 color = TextSecondary
@@ -99,7 +125,7 @@ fun EventItem(
 
         // Status
         Text(
-            text = event.status,
+            text = statusText,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = statusColor

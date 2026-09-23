@@ -14,7 +14,9 @@ object DatabaseProvider {
                 context.applicationContext,
                 AppDatabase::class.java,
                 "analytics_database"
-            ).build()
+            )
+                .addMigrations(MIGRATION_1_2)
+                .build()
             INSTANCE = instance
             instance
         }
