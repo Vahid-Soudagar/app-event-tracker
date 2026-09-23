@@ -9,15 +9,10 @@ import com.example.appeventtracker.sdk.data.model.EventEntity
 
 @Database(
     entities = [EventEntity::class],
-    version = 2,
+    version = 1,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun eventDao() : EventDao
 }
 
-internal val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE events ADD COLUMN next_retry_at INTEGER")
-    }
-}

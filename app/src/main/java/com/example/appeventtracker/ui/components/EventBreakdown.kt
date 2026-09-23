@@ -14,9 +14,13 @@ import com.example.appeventtracker.ui.theme.BorderColor
 import com.example.appeventtracker.ui.theme.PrimaryBlue
 import com.example.appeventtracker.ui.theme.RetryOrange
 import com.example.appeventtracker.ui.theme.SuccessGreen
+import java.util.Locale
 
 @Composable
-fun EventBreakdown() {
+fun EventBreakdown(
+    countsByType: Map<String, Int> = emptyMap(),
+    total: Int = 0
+) {
 
     Column(
         modifier = Modifier
@@ -32,38 +36,40 @@ fun EventBreakdown() {
 
         HorizontalDivider()
 
-        BreakdownRow(
-            event = "INSTALL",
-            count = "12",
-            percentage = "9.38%",
-            color = SuccessGreen
-        )
-
-        BreakdownRow(
-            event = "VISIT",
-            count = "26",
-            percentage = "20.31%",
-            color = PrimaryBlue
-        )
-
-        BreakdownRow(
-            event = "ADD_TO_CART",
-            count = "37",
-            percentage = "28.91%",
-            color = Color(0xFF5B20E8)
-        )
-
-        BreakdownRow(
-            event = "PURCHASE",
-            count = "53",
-            percentage = "41.41%",
-            color = RetryOrange
-        )
+        breakdownEvents.forEach { (event, color) ->
+            val count = countsByType[event] ?: 0
+            BreakdownRow(
+                event = event,
+                count = count.toString(),
+                percentage = formatPercentage(count, total),
+                color = color
+            )
+        }
     }
+}
+
+private val breakdownEvents = listOf(
+    "INSTALL" to SuccessGreen,
+    "VISIT" to PrimaryBlue,
+    "ADD_TO_CART" to Color(0xFF5B20E8),
+    "PURCHASE" to RetryOrange
+)
+
+private fun formatPercentage(count: Int, total: Int): String {
+    val percentage = if (total == 0) 0.0 else count * 100.0 / total
+    return String.format(Locale.US, "%.2f%%", percentage)
 }
 
 @Preview
 @Composable
 private fun EventBreakdownPreview() {
-    EventBreakdown()
+    EventBreakdown(
+        countsByType = mapOf(
+            "INSTALL" to 12,
+            "VISIT" to 26,
+            "ADD_TO_CART" to 37,
+            "PURCHASE" to 53
+        ),
+        total = 128
+    )
 }

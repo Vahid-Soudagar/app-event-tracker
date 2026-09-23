@@ -56,4 +56,10 @@ interface EventDao {
         ORDER BY id ASC
     """)
     fun observeAllEvents(): Flow<List<EventEntity>>
+
+    @Query("""
+        SELECT * FROM events
+        WHERE status = 'PROCESSED'
+    """)
+    fun observeProcessedEvents(): Flow<List<EventEntity>>
 }

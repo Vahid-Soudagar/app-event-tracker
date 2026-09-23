@@ -18,12 +18,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.appeventtracker.sdk.Analytics
 import com.example.appeventtracker.ui.components.EventBreakdown
 import com.example.appeventtracker.ui.components.EventStatCard
 import com.example.appeventtracker.ui.components.SummaryCard
@@ -33,6 +38,17 @@ import com.example.appeventtracker.ui.theme.*
 fun StatisticsScreen(
     modifier: Modifier = Modifier
 ) {
+
+    val context = LocalContext.current
+    val statistics by remember(context) {
+        Analytics.observeStatistics(context = context)
+    }.collectAsState(initial = null)
+
+    val total = statistics?.totalProcessed ?: 0
+    val uniqueVisits = statistics?.uniqueVisits ?: 0
+    val countsByType = statistics?.countsByType.orEmpty()
+
+    fun countOf(event: String) = (countsByType[event] ?: 0).toString()
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -63,13 +79,13 @@ fun StatisticsScreen(
 
                 SummaryCard(
                     title = "Total Events Processed",
-                    value = "128",
+                    value = total.toString(),
                     modifier = Modifier.weight(1f)
                 )
 
                 SummaryCard(
                     title = "Total Visits\n(Unique Session)",
-                    value = "26",
+                    value = uniqueVisits.toString(),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -86,14 +102,14 @@ fun StatisticsScreen(
 
                 EventStatCard(
                     event = "INSTALL",
-                    count = "12",
+                    count = countOf("INSTALL"),
                     color = InstallLight,
                     modifier = Modifier.weight(1f)
                 )
 
                 EventStatCard(
                     event = "VISIT",
-                    count = "26",
+                    count = countOf("VISIT"),
                     color = VisitLight,
                     modifier = Modifier.weight(1f)
                 )
@@ -108,14 +124,14 @@ fun StatisticsScreen(
 
                 EventStatCard(
                     event = "ADD_TO_CART",
-                    count = "37",
+                    count = countOf("ADD_TO_CART"),
                     color = CartLight,
                     modifier = Modifier.weight(1f)
                 )
 
                 EventStatCard(
                     event = "PURCHASE",
-                    count = "53",
+                    count = countOf("PURCHASE"),
                     color = PurchaseLight,
                     modifier = Modifier.weight(1f)
                 )
@@ -135,7 +151,10 @@ fun StatisticsScreen(
                 modifier = Modifier.height(6.dp)
             )
 
-            EventBreakdown()
+            EventBreakdown(
+                countsByType = countsByType,
+                total = total
+            )
         }
     }
 }
