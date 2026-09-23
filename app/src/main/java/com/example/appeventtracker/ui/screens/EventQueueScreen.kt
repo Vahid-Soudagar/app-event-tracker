@@ -115,8 +115,9 @@ fun EventQueueScreen(
         val filteredEvents = if (selectedTab.intValue == 0) {
             queueEvents
         } else {
+            // Failed / retrying = currently FAILED, or already failed once and now being retried
             queueEvents.filter {
-                it.status == "FAILED"
+                it.status == "FAILED" || it.retryCount > 0
             }
         }
 
